@@ -33,7 +33,7 @@ function ENT:Initialize()
 		self.direction=Vector(1,0,0);
 	end
 	
-	self:ConfigInOuts();		
+	self:ConfigInOuts();
 	self:SetOverlayText( self:GetDisplayText() )
 	
 end
@@ -63,9 +63,9 @@ function ENT:BuildIgnoreList()
 	
 		local CEnt = constraint.GetTable( table.remove( queue ) )
 		if type(CEnt) == "table" then
-			for _, mc in pairs( CEnt ) do 
+			for _, mc in pairs( CEnt ) do
 				if mc.Constraint.Type != "Rope" then
-					for _, my in pairs( mc.Entity ) do 
+					for _, my in pairs( mc.Entity ) do
 						if self.ignore[ my.Index ] != my.Entity then
 							self.ignore[ my.Index ] = my.Entity
 							table.insert( queue , my.Entity );
@@ -73,7 +73,7 @@ function ENT:BuildIgnoreList()
 					end
 				end
 			end
-		end	
+		end
 	
 	end
 	
@@ -154,6 +154,8 @@ end
 function ENT:TriggerInput(iname, value)
 
 	if ( value != nil && iname == "Distance" ) then
+		value=value or 256;
+		value = value > 2048 and 2048 or value<1 and 1 or value;
 		self.prox=value;
 	end
 	
@@ -207,12 +209,21 @@ end
 
 function ENT:Toogle_Prop_Gravity( prop , yes_no )
 	
-	if ( !prop:IsValid() ) then return end 
+	if ( !prop:IsValid() ) then return end
 
 	if ( self.ignore[ prop:EntIndex() ] == prop ) then return false; end
 	
 	if ( !self:is_true(self.workonplayers) && prop:GetClass() == "player" ) then
 		return false;
+	end
+	
+	if prop.CPPIGetOwner and self.CPPIGetOwner then
+		local a = prop:CPPIGetOwner() or NULL
+		local b = self:CPPIGetOwner() or NULL
+		
+		if a:IsValid() and b:IsValid() and a:IsPlayer() and b:IsPlayer() and a ~= b then
+			return false
+		end
 	end
 	
 	if prop:GetMoveType() == MOVETYPE_NONE then return false; end
@@ -255,7 +266,7 @@ function ENT:Toogle_Prop_Gravity( prop , yes_no )
 		
 	local phys=prop:GetPhysicsObject();
 	
-	if ( !phys:IsValid() ) then return end 
+	if ( !phys:IsValid() ) then return end
 	
 	phys:EnableGravity( yes_no );
 	
@@ -267,7 +278,7 @@ function ENT:Gravity_Logic()
 
 	for _,contact in pairs( self:GetEverythingInSphere( self:GetPos(), self.prox || 10 ) ) do
 		self:Toogle_Prop_Gravity( contact , false );
-		NewObjs[ contact:EntIndex() ] = contact;	
+		NewObjs[ contact:EntIndex() ] = contact;
 	end
 
 	for idx,contact in pairs( self.objects ) do
@@ -290,7 +301,7 @@ end
 
 function ENT:Slow_Prop( prop , yes_no )
 	
-	if ( !prop:IsValid() ) then return end 
+	if ( !prop:IsValid() ) then return end
 
 	if ( self.ignore[ prop:EntIndex() ] == prop ) then return false; end
 	
@@ -323,7 +334,7 @@ function ENT:Slow_Prop( prop , yes_no )
 						part:SetDragCoefficient( 100 * self.multiplier );
 						
 					end
-				end 
+				end
 				
 				prop:SetMoveType(MOVETYPE_FLY);
 				prop:SetMoveCollide(MOVECOLLIDE_FLY_BOUNCE);
@@ -353,7 +364,7 @@ function ENT:Slow_Prop( prop , yes_no )
 						part:SetDragCoefficient( 1 );
 						
 					end
-				end 
+				end
 			end
 			
 			
@@ -387,7 +398,7 @@ function ENT:Slow_Prop( prop , yes_no )
 	
 	local phys=prop:GetPhysicsObject();
 	
-	if ( !phys:IsValid() ) then return end 
+	if ( !phys:IsValid() ) then return end
 	
 	phys:EnableGravity( yes_no );
 	if ! yes_no then
@@ -404,7 +415,7 @@ function ENT:Static_Logic()
 
 	for _,contact in pairs( self:GetEverythingInSphere( self:GetPos(), self.prox || 10 ) ) do
 		self:Slow_Prop( contact , false );
-		NewObjs[ contact:EntIndex() ] = contact;	
+		NewObjs[ contact:EntIndex() ] = contact;
 	end
 
 	for idx,contact in pairs( self.objects ) do
@@ -427,7 +438,7 @@ end
 
 function ENT:PullPushProp( prop , vec )
 	
-	if ( !prop:IsValid() ) then return end 
+	if ( !prop:IsValid() ) then return end
 	
 	if ( self.ignore[ prop:EntIndex() ] == prop ) then return false; end
 	
@@ -457,7 +468,7 @@ function ENT:PullPushProp( prop , vec )
 	
 	local phys=prop:GetPhysicsObject();
 	
-	if ( !phys:IsValid() ) then return end 
+	if ( !phys:IsValid() ) then return end
 	
 	phys:AddVelocity( vec );
 	
@@ -465,7 +476,7 @@ end
 
 function ENT:VelModProp( prop , mul )
 	
-	if ( !prop:IsValid() ) then return end 
+	if ( !prop:IsValid() ) then return end
 	
 	if ( self.ignore[ prop:EntIndex() ] == prop ) then return false; end
 	
@@ -500,7 +511,7 @@ function ENT:VelModProp( prop , mul )
 	
 	local phys=prop:GetPhysicsObject();
 	
-	if ( !phys:IsValid() ) then return end 
+	if ( !phys:IsValid() ) then return end
 	
 	local vel3 = phys:GetVelocity()
 	vel3:Normalize()
@@ -531,7 +542,7 @@ end
 
 function ENT:Push_Logic()
 
-	local Center=self:GetPos(); 
+	local Center=self:GetPos();
 	local HalfProx=self.prox / 2;
 	
 	for _,contact in pairs( self:GetEverythingInSphere( self:GetPos(), self.prox || 10 ) ) do
@@ -539,7 +550,7 @@ function ENT:Push_Logic()
 		local Path = contact:GetPos()-Center;
 		local Length = Path:Length();
 		Path = Path * ( 1.0 / Length )
-		self:PullPushProp( contact , Path * self.multiplier );		
+		self:PullPushProp( contact , Path * self.multiplier );
 		
 	end
 
@@ -548,7 +559,7 @@ end
 
 function ENT:Push_Logic()
 
-	local Center=self:GetPos(); 
+	local Center=self:GetPos();
 	local HalfProx=self.prox / 2;
 	
 	for _,contact in pairs( self:GetEverythingInSphere( self:GetPos(), self.prox || 10 ) ) do
@@ -556,7 +567,7 @@ function ENT:Push_Logic()
 		local Path = contact:GetPos()-Center;
 		local Length = Path:Length();
 		Path = Path * ( 1.0 / Length )
-		self:PullPushProp( contact , Path * self.multiplier );		
+		self:PullPushProp( contact , Path * self.multiplier );
 		
 	end
 
@@ -566,7 +577,7 @@ end
 
 function ENT:Push_Logic()
 
-	local Center=self:GetPos(); 
+	local Center=self:GetPos();
 	local HalfProx=self.prox / 2;
 	
 	for _,contact in pairs( self:GetEverythingInSphere( self:GetPos(), self.prox || 10 ) ) do
@@ -574,7 +585,7 @@ function ENT:Push_Logic()
 		local Path = contact:GetPos()-Center;
 		local Length = Path:Length();
 		Path = Path * ( 1.0 / Length )
-		self:PullPushProp( contact , Path * self.multiplier );		
+		self:PullPushProp( contact , Path * self.multiplier );
 		
 	end
 
@@ -594,7 +605,7 @@ function ENT:Wind_Logic()
 	
 	for _,contact in pairs( self:GetEverythingInSphere( self:GetPos(), self.prox || 10 ) ) do
 		
-		self:PullPushProp( contact , Up * self.multiplier );		
+		self:PullPushProp( contact , Up * self.multiplier );
 		
 	end
 	
@@ -607,6 +618,8 @@ end
 
 function ENT:GetEverythingInSphere( center , range )
 
+	range = range > 2048 and 2048 or range<1 and 1 or range
+	
 	local Objs=ents.FindInSphere( self:GetPos(), range )
 	
 	if self.arc >= 0 && self.arc < 360 then
@@ -652,14 +665,14 @@ function ENT:Vortex_Logic()
 
 	local Up = self.direction;
 	Up:Normalize()
-	local Center=self:GetPos(); 
+	local Center=self:GetPos();
 	local HalfProx=self.prox / 2;
 
 	for _,contact in pairs( self:GetEverythingInSphere( Center , self.prox || 10 ) ) do
 		
 		local Path = ( contact:GetPos()+contact:GetVelocity() )-Center;
 		Path:Normalize()
-		self:PullPushProp( contact , Path:Cross( Up ) * self.multiplier );		
+		self:PullPushProp( contact , Path:Cross( Up ) * self.multiplier );
 		
 	end
 
@@ -674,7 +687,7 @@ end
 
 function ENT:Flame_Apply( prop  , yes_no )
 
-	if ( !prop:IsValid() ) then return end 
+	if ( !prop:IsValid() ) then return end
 
 	if ( self.ignore[ prop:EntIndex() ] == prop ) then return false; end
 	
@@ -713,7 +726,7 @@ end
 
 function ENT:Crush_Apply( prop , yes_no )
 
-	if ( !prop:IsValid() ) then return end 
+	if ( !prop:IsValid() ) then return end
 
 	if ( self.ignore[ prop:EntIndex() ] == prop ) then return false; end
 	
@@ -733,7 +746,7 @@ function ENT:Battery_Apply( prop , yes_no )
 
 	local x,maxx;
 	
-	if ( !prop:IsValid() ) then return end 
+	if ( !prop:IsValid() ) then return end
 
 	if ( self.ignore[ prop:EntIndex() ] == prop ) then return false; end
 	
@@ -762,7 +775,7 @@ function ENT:Health_Apply( prop , yes_no )
 
 	local x,maxx;
 	
-	if ( !prop:IsValid() ) then return end 
+	if ( !prop:IsValid() ) then return end
 
 	if ( self.ignore[ prop:EntIndex() ] == prop ) then return false; end
 	
@@ -831,7 +844,7 @@ end
 
 function ENT:EMP_Apply( prop , yes_no )
 
-	if ( !prop:IsValid() ) then return end 
+	if ( !prop:IsValid() ) then return end
 
 	if ( self.ignore[ prop:EntIndex() ] == prop ) then return false; end
 	
@@ -883,7 +896,7 @@ function ENT:EMP_Logic()
 
 	for _,contact in pairs( self:GetEverythingInSphere( self:GetPos() , self.prox || 10 ) ) do
 		self:EMP_Apply( contact , true );
-		NewObjs[ contact:EntIndex() ] = contact;	
+		NewObjs[ contact:EntIndex() ] = contact;
 	end
 	
 	for idx,contact in pairs( self.objects ) do
@@ -918,7 +931,7 @@ function ENT:WakeUp( prop )
 			end
 			
 			local phys=prop:GetPhysicsObject();
-			if ( phys:IsValid() ) then phys:Wake(); end 
+			if ( phys:IsValid() ) then phys:Wake(); end
 			
 		end
 	end
@@ -935,7 +948,7 @@ function ENT:NoCollide_Logic()
 
 		myid=contact:EntIndex();
 		
-		if ( self.ignore[ myid ] != contact ) then  
+		if ( self.ignore[ myid ] != contact ) then
 			
 			Valid[ myid ]=true;
 			
