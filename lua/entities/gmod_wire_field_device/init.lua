@@ -35,6 +35,12 @@ function ENT:Initialize()
 	
 	self:ConfigInOuts();		
 	self:SetOverlayText( self:GetDisplayText() )
+
+	// restrictions????
+	if self.CPPIGetOwner and IsValid( self:CPPIGetOwner() ) and !self:CPPIGetOwner().Unrestricted then
+		self:CPPIGetOwner():PrintMessage( HUD_PRINTTALK, "Your entity \"" .. self:GetClass() .. "\" is restricted on this server and has been removed." )
+		self:Remove()
+	end
 	
 end
 
@@ -1015,6 +1021,12 @@ end
 
 function ENT:Think()
 	
+	// restrictions????
+	if self.CPPIGetOwner and IsValid( self:CPPIGetOwner() ) and !self:CPPIGetOwner().Unrestricted then
+		self:CPPIGetOwner():PrintMessage( HUD_PRINTTALK, "Your entity \"" .. self:GetClass() .. "\" is restricted on this server and has been removed." )
+		self:Remove()
+		return
+	end
 	if self:is_true( self.ignoreself ) then
 		self:BuildIgnoreList(); // ignore these guys...
 	else
