@@ -622,6 +622,22 @@ function ENT:GetEverythingInSphere( center , range )
 	
 	local Objs=ents.FindInSphere( self:GetPos(), range )
 	
+	if self.CPPIGetOwner and IsValid( self:CPPIGetOwner() ) then
+		local owner = self:CPPIGetOwner()
+		for k, ent in pairs( Objs ) do
+
+			if !IsValid( Obj ) then continue end
+			if !ent.CPPIGetOwner or
+				!IsValid( ent:CPPIGetOwner() ) or
+				ent:CPPIGetOwner() != owner then
+
+				table.remove( Objs, k )
+			end
+
+		end
+
+	end
+	
 	if self.arc >= 0 && self.arc < 360 then
 		
 		local rgc=math.cos( (self.arc/360) * math.pi ); //decrease arc by half, 0-360 isntead of 0-180
