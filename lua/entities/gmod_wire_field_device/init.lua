@@ -622,20 +622,18 @@ function ENT:GetEverythingInSphere( center , range )
 	
 	local Objs=ents.FindInSphere( self:GetPos(), range )
 	
-	if self.CPPIGetOwner and IsValid( self:CPPIGetOwner() ) then
+	if self.CPPIGetOwner then
 		local owner = self:CPPIGetOwner()
+		local newObjs = {}
 		for k, ent in pairs( Objs ) do
 
-			if !IsValid( Obj ) then continue end
-			if !ent.CPPIGetOwner or
-				!IsValid( ent:CPPIGetOwner() ) or
-				ent:CPPIGetOwner() != owner then
-
-				table.remove( Objs, k )
+			local entOwner = ent:CPPIGetOwner()
+			if entOwner == owner or ent == owner or ent:IsPlayer() and owner:IsAdmin() then
+				table.insert( newObjs, ent )
 			end
 
 		end
-
+		Objs = newObjs
 	end
 	
 	if self.arc >= 0 && self.arc < 360 then
