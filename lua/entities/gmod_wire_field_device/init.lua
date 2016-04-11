@@ -6,6 +6,18 @@ include('shared.lua')
 
 ENT.WireDebugName = "WIRE_FieldGen"
 
+-- Prevent unknown infinite recursion
+local recursing
+local function _unhook(...)
+	recursing = false
+	return ...
+end
+local function HOOK(...)
+	if recursing then return end
+	recursing = true
+	return _unhook(gamemode.Call(...))
+end
+
 local MODEL = Model( "models/props_lab/binderblue.mdl" )
 
 local EMP_IGNORE_INPUTS = { Kill=true , Pod=true , Eject=true , Lock=true , Terminate = true };
@@ -229,7 +241,7 @@ function ENT:Toogle_Prop_Gravity( prop , yes_no )
 	if prop:GetMoveType() == MOVETYPE_NONE then return false; end
 	if prop:GetMoveType() == MOVETYPE_NOCLIP then return false; end //do this to prevent -uncliping-
 	
-	if prop:GetClass() != "player" && !gamemode.Call("PhysgunPickup",self.pl,prop) then return false; end
+	if prop:GetClass() != "player" && !HOOK("PhysgunPickup",self.pl,prop) then return false; end
 	
 	if prop:GetMoveType() != MOVETYPE_VPHYSICS then
 		if yes_no == false then
@@ -312,7 +324,7 @@ function ENT:Slow_Prop( prop , yes_no )
 	if prop:GetMoveType() == MOVETYPE_NONE then return false; end
 	if prop:GetMoveType() == MOVETYPE_NOCLIP then return false; end //do this to prevent -uncliping-
 	
-	if prop:GetClass() != "player" && !gamemode.Call("PhysgunPickup",self.pl,prop) then return false; end
+	if prop:GetClass() != "player" && !HOOK("PhysgunPickup",self.pl,prop) then return false; end
 	
 	local MulU=self.multiplier+15.1;
 	
@@ -448,7 +460,7 @@ function ENT:PullPushProp( prop , vec )
 	
 	if prop:GetMoveType() == MOVETYPE_NONE then return false; end
 	
-	if prop:GetClass() != "player" && !gamemode.Call("PhysgunPickup",self.pl,prop) then return false; end
+	if prop:GetClass() != "player" && !HOOK("PhysgunPickup",self.pl,prop) then return false; end
 	
 	if prop:GetMoveType() != MOVETYPE_VPHYSICS then
 		if prop.AddVelocity then
@@ -486,7 +498,7 @@ function ENT:VelModProp( prop , mul )
 	
 	if prop:GetMoveType() == MOVETYPE_NONE then return false; end
 	
-	if prop:GetClass() != "player" && !gamemode.Call("PhysgunPickup",self.pl,prop) then return false; end
+	if prop:GetClass() != "player" && !HOOK("PhysgunPickup",self.pl,prop) then return false; end
 	
 	if prop:GetMoveType() != MOVETYPE_VPHYSICS then
 		local vel1 = prop:GetVelocity()
@@ -711,7 +723,7 @@ function ENT:Flame_Apply( prop  , yes_no )
 		return false;
 	end
 	
-	if prop:GetClass() != "player" && !gamemode.Call("PhysgunPickup",self.pl,prop) then return false; end
+	if prop:GetClass() != "player" && !HOOK("PhysgunPickup",self.pl,prop) then return false; end
 	
 	if yes_no == true then
 		prop:Ignite( self.multiplier , 0.0 );
@@ -748,7 +760,7 @@ function ENT:Crush_Apply( prop , yes_no )
 		return false;
 	end
 	
-	if prop:GetClass() != "player" && !gamemode.Call( "PhysgunPickup", self.pl , prop ) then return false; end
+	if prop:GetClass() != "player" && !HOOK( "PhysgunPickup", self.pl , prop ) then return false; end
 	
 	if yes_no == true then
 		prop:TakeDamage( self.multiplier ,  self.pl );
@@ -768,7 +780,7 @@ function ENT:Battery_Apply( prop , yes_no )
 		return false;
 	end
 	
-	if prop:GetClass() != "player" && !gamemode.Call( "PhysgunPickup", self.pl , prop ) then return false; end
+	if prop:GetClass() != "player" && !HOOK( "PhysgunPickup", self.pl , prop ) then return false; end
 	
 	if prop.Armor then
 	
@@ -797,7 +809,7 @@ function ENT:Health_Apply( prop , yes_no )
 		return false;
 	end
 	
-	if prop:GetClass() != "player" && !gamemode.Call( "PhysgunPickup", self.pl , prop ) then return false; end
+	if prop:GetClass() != "player" && !HOOK( "PhysgunPickup", self.pl , prop ) then return false; end
 	
 	if yes_no == true then
 	
@@ -866,7 +878,7 @@ function ENT:EMP_Apply( prop , yes_no )
 		return false;
 	end
 	
-	if prop:GetClass() != "player" && !gamemode.Call( "PhysgunPickup", self.pl , prop ) then return false; end
+	if prop:GetClass() != "player" && !HOOK( "PhysgunPickup", self.pl , prop ) then return false; end
 	
 	if (prop) and (prop.Inputs) and type(prop.Inputs) == 'table' then
 		for k,v in pairs(prop.Inputs) do
