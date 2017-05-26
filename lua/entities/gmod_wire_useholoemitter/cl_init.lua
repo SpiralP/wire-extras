@@ -190,11 +190,11 @@ function ENT:Draw( )
 end
 
 function Player_EyeAngle(ply)
-	EyeTrace = ply:GetEyeTrace()
-	StartPos = EyeTrace.StartPos
-	EndPos = EyeTrace.HitPos
-	Distance = StartPos:Distance(EndPos)
-	Temp = EndPos - StartPos
+	local EyeTrace = ply:GetEyeTrace()
+	local StartPos = EyeTrace.StartPos
+	local EndPos = EyeTrace.HitPos
+	local Distance = StartPos:Distance(EndPos)
+	local Temp = EndPos - StartPos
 	return Temp:Angle()
 end
 
